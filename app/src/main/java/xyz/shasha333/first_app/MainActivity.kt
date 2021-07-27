@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
                     5 -> 0
                     6 -> 0
                     7 -> 0
-                    else->2
+                    else->1
                 }
             }
         }
