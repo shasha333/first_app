@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
                     5 -> 0
                     6 -> 0
                     7 -> 0
-                    else->1
+                    else->0
                 }
             }
         }*/
@@ -221,7 +221,6 @@ class MainActivity : AppCompatActivity() {
     もし、今後変わってきそうな数字を使う場合は一番上にある定数を使うこと。現時点での定数は以下の二つ
     val buttonnumber=5//試験管ボタンの数
     val boxnumber=4 //１試験管ごとの色付きBOXの個数
-    ifを使う場合は出来るだけelseも一緒に使って、予定外のものはerrorcod:Intに値を代入
     */
     fun completecheck(tubenum:Int):Boolean{//指定のtube(0～)の色が揃ったかを確認する
 
