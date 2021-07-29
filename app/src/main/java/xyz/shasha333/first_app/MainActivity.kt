@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     val boxnumber=4 //１試験管ごとの色付きBOXの個数
     /*後で変わりそうなものを定数として宣言終了*/
     /*今後使いそうな要素を変数として宣言開始*/
+    var beforeaction=Array(5,{Array(4,{-1})})//戻れるように動きを記憶しておく(5回分のarrayOf{fromtube,frombox,totube,tobox}で0が古い)
     var boxcolor = Array(buttonnumber, { Array<Int>(boxnumber, { 0 }) })//現状の色番号を保存する用(0=非表示,1～色を対応させる)
     var selectingstate=-1//現在の選択状況を示す(0=選択なし, other=選択済み移動元試験管番号)
     var errorcode=0//エラーコード()
@@ -29,24 +30,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        /*boxcolorの初期化開始*/
-        /*for(i in 0..buttonnumber-1){
-            for(j in 0..boxnumber-1){
-                boxcolor[i][j]=when(i){
-                    0 -> 1
-                    1 -> 2
-                    2 -> 3
-                    3 -> 0
-                    4 -> 0
-                    5 -> 0
-                    6 -> 0
-                    7 -> 0
-                    else->0
-                }
-            }
-        }*/
-        firstcondition()
-        refresh()
+        firstcondition()//ボールの初期配置を決定
+        refresh()//決定した初期配置通りにボールを移動
         /*boxcolorの初期化終了*/
         for (i in 0..buttonnumber-1) {//ボタンのリスナー作成
             val strId = resources.getIdentifier(
@@ -84,13 +69,31 @@ class MainActivity : AppCompatActivity() {
                     if(topindex(i)==0){//移動先が満タンの場合
                         toast("満タンで移動できません。")
                     }else{
-                        boxmove(selectingstate, i) //移動操作
+                        if(topindex(i)>=boxnumber){//移動先が空っぽなら
+                            boxmove(selectingstate, i) //移動操作
+                            actionrecord(selectingstate,topindex(selectingstate)-1,i,topindex(i))//履歴として保存
+                        }else if(boxcolor[selectingstate][topindex(selectingstate)]==boxcolor[i][topindex(i)]) {//移動元ボールが移動先ボールの色と一緒だったら移動する。
+                            boxmove(selectingstate, i) //移動操作
+                            actionrecord(selectingstate,topindex(selectingstate)-1,i,topindex(i))//履歴として保存
+                        }else{
+                            toast("同色でなければ移動できません")
+                        }
                     }
                     selectingstate=-1//未選択状態に戻す
                     animation(i,0)//選択解除したため、強調も解除
                 }
             }
         }
+    }
+    fun actionrecord(fromtube:Int,frombox:Int,totube:Int,tobox:Int){//1つ前の移動を記憶する。最大5つ。
+        val recentaction=arrayOf(fromtube,frombox,totube,tobox)//forで入れやすくするために配列にしておく
+        for(i in 0..3) {//4回分を古い方へ(0の方へ)ずらして直前アクションを入れる空白を作る。
+            beforeaction[i]=beforeaction[i+1]
+        }
+        for(i in 0..3) {
+            beforeaction[4][i]=recentaction[i]//最新版を代入する
+        }
+        Log.d("ログの記憶内容",beforeaction[4].contentToString())
     }
 
     fun boxmove(from: Int, to: Int){//移動元と移動先のボタン番号から移動操作をする
@@ -113,7 +116,14 @@ class MainActivity : AppCompatActivity() {
         val toDrawable = resources.getDrawable(indextocolor(boxcolor[toindex[0]][toindex[1]] ))//置き換える画像を取ってくる
         toImage.setImageDrawable(toDrawable) //移動先の画像を所定の色に変える
         toImage.setVisibility(View.VISIBLE)//移動先の画像を表示する
+        if(completecheck(toindex[0])){//移動先のtubeが完成していたら
+            if(allcompletecheck()){//全てが完成していたら
+                toast("全てのボトルが完成！！おめでとー")
+            }else{//移動先だけだったら
+                toast((toindex[0]+1).toString()+"本目のボトルが完成！！！")
+            }
 
+        }
     }
 
     fun animation(tubenum:Int,updown:Int){//bottleの番号を受け取ってそれを選択中のアニメーションをする。（updown: 0=down, 1=up）
@@ -221,6 +231,7 @@ class MainActivity : AppCompatActivity() {
     もし、今後変わってきそうな数字を使う場合は一番上にある定数を使うこと。現時点での定数は以下の二つ
     val buttonnumber=5//試験管ボタンの数
     val boxnumber=4 //１試験管ごとの色付きBOXの個数
+    ifを使う場合は出来るだけelseも一緒に使って、予定外のものはerrorcod:Intに値を代入
     */
     fun completecheck(tubenum:Int):Boolean{//指定のtube(0～)の色が揃ったかを確認する
 
@@ -231,4 +242,5 @@ class MainActivity : AppCompatActivity() {
         return false
     }
     /*以上南専属*/
+
 }
