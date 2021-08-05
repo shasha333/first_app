@@ -259,11 +259,27 @@ class MainActivity : AppCompatActivity() {
     val boxnumber=4 //１試験管ごとの色付きBOXの個数
     */
     fun completecheck(tubenum:Int):Boolean{//指定のtube(0～)の色が揃ったかを確認する
-
+        for(i in 0..boxnumber - 2){
+            if(boxcolor[tubenum][i]==boxcolor[tubenum][i + 1]){
+                if(i==boxnumber - 2){
+                    return true
+                }
+            }else{
+                return false
+            }
+        }
         return false
     }
     fun allcompletecheck():Boolean{//全てのtubeの色が揃っていたらtrueを返事
-
+        var count =  0
+        for(i in 0..buttonnumber - 1){
+            if(completecheck(i)){
+                count++
+            }
+        }
+        if(count==buttonnumber){
+            return true
+        }
         return false
     }
     /*以上南専属*/

@@ -16,7 +16,7 @@
             android:id="@+id/level"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Lv."
+            android:text="@string/title1"
             android:textSize="60dp"
             android:textColor="#ffffff"/>
         <TextView
@@ -37,8 +37,9 @@
 
         <FrameLayout
             android:id="@+id/bottle01"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="5"
             android:layout_gravity="center">
 
             <ImageButton
@@ -88,8 +89,9 @@
 
         <FrameLayout
             android:id="@+id/bottle02"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="5"
             android:layout_gravity="center">
 
             <ImageButton
@@ -139,8 +141,9 @@
 
         <FrameLayout
             android:id="@+id/bottle03"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="5"
             android:layout_gravity="center">
 
             <ImageButton
@@ -190,8 +193,9 @@
 
         <FrameLayout
             android:id="@+id/bottle04"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="5"
             android:layout_gravity="center">
 
             <ImageButton
@@ -244,8 +248,9 @@
 
         <FrameLayout
             android:id="@+id/bottle05"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="5"
             android:layout_gravity="center">
 
             <ImageButton

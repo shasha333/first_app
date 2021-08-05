@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">first_app</string>
+    <string name="title1">Lv.</string>
 </resources>
