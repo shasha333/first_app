@@ -1,31 +1,34 @@
 package xyz.shasha333.first_app
 
-import android.app.Activity
-import android.app.PendingIntent.getActivity
-import android.content.Context
+
 import android.os.Bundle
+import android.provider.Contacts
 import android.util.Log
 import android.view.View
-import android.view.animation.RotateAnimation
+import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
+import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
-
+import kotlin.coroutines.CoroutineContext
 
 class MainActivity : AppCompatActivity() {
     /*後で変わりそうなものを定数として宣言開始*/
-    val buttonnumber=5//試験管ボタンの数
-    val colornumber=buttonnumber-2//色付きのボールの種類
-    val boxnumber=4 //１試験管ごとの色付きBOXの個数
+    val buttonnumber = 5//試験管ボタンの数
+    val colornumber = buttonnumber - 2//色付きのボールの種類
+    val boxnumber = 4 //１試験管ごとの色付きBOXの個数
+
     /*後で変わりそうなものを定数として宣言終了*/
     /*今後使いそうな要素を変数として宣言開始*/
-    var beforeaction=Array(5,{Array(4,{-1})})//戻れるように動きを記憶しておく(5回分のarrayOf{fromtube,frombox,totube,tobox}で0が古い)
-    var boxcolor = Array(buttonnumber, { Array<Int>(boxnumber, { 0 }) })//現状の色番号を保存する用(0=非表示,1～色を対応させる)
-    var selectingstate=-1//現在の選択状況を示す(0=選択なし, other=選択済み移動元試験管番号)
-    var errorcode=0//エラーコード()
+    var beforeaction = Array(5,
+        { Array(4, { -1 }) })//戻れるように動きを記憶しておく(5回分のarrayOf{fromtube,frombox,totube,tobox}で0が古い)
+    var boxcolor =
+        Array(buttonnumber, { Array<Int>(boxnumber, { 0 }) })//現状の色番号を保存する用(0=非表示,1～色を対応させる)
+    var selectingstate = -1//現在の選択状況を示す(0=選択なし, other=選択済み移動元試験管番号)
+    var errorcode = 0//エラーコード()
     /*今後使いそうな要素を変数として宣言終了*/
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,100 +36,123 @@ class MainActivity : AppCompatActivity() {
         firstcondition()//ボールの初期配置を決定
         refresh()//決定した初期配置通りにボールを移動
         /*boxcolorの初期化終了*/
-        for (i in 0..buttonnumber-1) {//ボタンのリスナー作成
+        for (i in 0..buttonnumber - 1) {//ボタンのリスナー作成
             val strId = resources.getIdentifier(
                 "button" + zerohuka1to2(i + 1),
                 "id",
                 getPackageName()
             )//Id取ってくる
             val button = findViewById<ImageButton>(strId)//View取ってくる
-            button.setOnClickListener(){//リスナーのセット
+            button.setOnClickListener() {//リスナーのセット
                 pusshedbutton(it)
             }
         }
     }
 
-    fun pusshedbutton(view: View){//試験管ボタンが押されたときの反応
-        for (i in 0..buttonnumber-1) {
+    fun pusshedbutton(view: View) {//試験管ボタンが押されたときの反応
+        for (i in 0..buttonnumber - 1) {
             val strId = resources.getIdentifier(
                 "button" + zerohuka1to2(i + 1),
                 "id",
                 getPackageName()
             )//buttonのId取ってくる
-            if(view.getId()==strId){//Idが押されたボタンと一致するボタンがあったら
-                if(selectingstate==-1){//移動元が選択されていない場合
-                    if(topindex(i)==4){//移動元が空の場合
+            if (view.getId() == strId) {//Idが押されたボタンと一致するボタンがあったら
+                if (selectingstate == -1) {//移動元が選択されていない場合
+                    if (topindex(i) == 4) {//移動元が空の場合
                         toast("ここには何も入っていません")
-                    }else {//何かしらが入っていれば
+                    } else {//何かしらが入っていれば
                         selectingstate = i//今回押されたものを移動元として保存
-                        animation(i,1)//選択したため、強調する
+                        animation(i, 1)//選択したため、強調する
                     }
-                }else if(selectingstate==i){//既に選択されているのにまた押された場合
-                    toast("同じところには移動できません")
-                    selectingstate=-1//未選択状態に戻す
-                    animation(i,0)//選択解除したため、強調も解除
-                }else{//移動元が決まっていた場合
-                    if(topindex(i)==0){//移動先が満タンの場合
+                } else if (selectingstate == i) {//既に選択されているのにまた押された場合
+                    selectingstate = -1//未選択状態に戻す
+                    animation(i, 0)//選択解除したため、強調も解除
+                } else {//移動元が決まっていた場合
+                    if (topindex(i) == 0) {//移動先が満タンの場合
                         toast("満タンで移動できません。")
-                    }else{
-                        if(topindex(i)>=boxnumber){//移動先が空っぽなら
+                    } else {
+                        if (topindex(i) >= boxnumber) {//移動先が空っぽなら
                             boxmove(selectingstate, i) //移動操作
-                            actionrecord(selectingstate,topindex(selectingstate)-1,i,topindex(i))//履歴として保存
-                        }else if(boxcolor[selectingstate][topindex(selectingstate)]==boxcolor[i][topindex(i)]) {//移動元ボールが移動先ボールの色と一緒だったら移動する。
+                            actionrecord(
+                                selectingstate,
+                                topindex(selectingstate) - 1,
+                                i,
+                                topindex(i)
+                            )//履歴として保存
+                        } else if (boxcolor[selectingstate][topindex(selectingstate)] == boxcolor[i][topindex(i)]) {//移動元ボールが移動先ボールの色と一緒だったら移動する。
                             boxmove(selectingstate, i) //移動操作
-                            actionrecord(selectingstate,topindex(selectingstate)-1,i,topindex(i))//履歴として保存
-                        }else{
+                            actionrecord(
+                                selectingstate,
+                                topindex(selectingstate) - 1,
+                                i,
+                                topindex(i)
+                            )//履歴として保存
+                        } else {
                             toast("同色でなければ移動できません")
                         }
                     }
-                    selectingstate=-1//未選択状態に戻す
-                    animation(i,0)//選択解除したため、強調も解除
+                    animation(selectingstate, 0)//選択解除したため、強調も解除
+                    selectingstate = -1//未選択状態に戻す
                 }
             }
         }
     }
-    fun actionrecord(fromtube:Int,frombox:Int,totube:Int,tobox:Int){//1つ前の移動を記憶する。最大5つ。
-        val recentaction=arrayOf(fromtube,frombox,totube,tobox)//forで入れやすくするために配列にしておく
-        for(i in 0..3) {//4回分を古い方へ(0の方へ)ずらして直前アクションを入れる空白を作る。
-            beforeaction[i]=beforeaction[i+1]
+
+    fun actionrecord(fromtube: Int, frombox: Int, totube: Int, tobox: Int) {//1つ前の移動を記憶する。最大5つ。
+        val recentaction = arrayOf(fromtube, frombox, totube, tobox)//forで入れやすくするために配列にしておく
+        for (i in 0..3) {//4回分を古い方へ(0の方へ)ずらして直前アクションを入れる空白を作る。
+            beforeaction[i] = beforeaction[i + 1]
         }
-        for(i in 0..3) {
-            beforeaction[4][i]=recentaction[i]//最新版を代入する
+        for (i in 0..3) {
+            beforeaction[4][i] = recentaction[i]//最新版を代入する
         }
-        Log.d("ログの記憶内容",beforeaction[4].contentToString())
+        Log.d("ログの記憶内容", beforeaction[4].contentToString())
     }
 
-    fun boxmove(from: Int, to: Int){//移動元と移動先のボタン番号から移動操作をする
-        val toindex=arrayOf<Int>(to, topindex(to) - 1)//移動先のボールの座標（0,0）
-        val fromindex=arrayOf(from, topindex(from))//移動元の座標（0,0）
+    fun boxmove(from: Int, to: Int) {//移動元と移動先のボタン番号から移動操作をする
+        val toindex = arrayOf<Int>(to, topindex(to) - 1)//移動先のボールの座標（0,0）
+        val fromindex = arrayOf(from, topindex(from))//移動元の座標（0,0）
         boxcolor[toindex[0]][toindex[1]] = boxcolor[fromindex[0]][fromindex[1]]//数値的に移動する
         boxcolor[fromindex[0]][fromindex[1]] = 0//移動元を消す
         val fromId = resources.getIdentifier(
-            "boll" + zerohuka1to2(fromindex[0] + 1)+zerohuka1to2(fromindex[1]+1),
+            "boll" + zerohuka1to2(fromindex[0] + 1) + zerohuka1to2(fromindex[1] + 1),
             "id",
             getPackageName()
         )//移動元のballのId取ってくる
         findViewById<ImageView>(fromId).setVisibility(View.INVISIBLE)//移動元の画像を非表示にする
         val toId = resources.getIdentifier(
-            "boll" + zerohuka1to2(toindex[0] + 1)+zerohuka1to2(toindex[1]+1),
+            "boll" + zerohuka1to2(toindex[0] + 1) + zerohuka1to2(toindex[1] + 1),
             "id",
             getPackageName()
         )//移動先のballのId取ってくる
-        val toImage= findViewById<ImageView>(toId)//移動先のViewを持ってくる
-        val toDrawable = resources.getDrawable(indextocolor(boxcolor[toindex[0]][toindex[1]] ))//置き換える画像を取ってくる
+        val toImage = findViewById<ImageView>(toId)//移動先のViewを持ってくる
+        val toDrawable =
+            resources.getDrawable(indextocolor(boxcolor[toindex[0]][toindex[1]]))//置き換える画像を取ってくる
         toImage.setImageDrawable(toDrawable) //移動先の画像を所定の色に変える
         toImage.setVisibility(View.VISIBLE)//移動先の画像を表示する
-        if(completecheck(toindex[0])){//移動先のtubeが完成していたら
-            if(allcompletecheck()){//全てが完成していたら
+        if (completecheck(toindex[0])) {//移動先のtubeが完成していたら
+            if (allcompletecheck()) {//全てが完成していたら
                 toast("全てのボトルが完成！！おめでとー")
-            }else{//移動先だけだったら
-                toast((toindex[0]+1).toString()+"本目のボトルが完成！！！")
+            } else {//移動先だけだったら
+                toast((toindex[0] + 1).toString() + "本目のボトルが完成！！！")
             }
 
         }
     }
 
-    fun animation(tubenum:Int,updown:Int){//bottleの番号を受け取ってそれを選択中のアニメーションをする。（updown: 0=down, 1=up）
+    fun animation(tubenum:Int,updown:Int){//移動させて固定する
+        val strId = resources.getIdentifier(
+            "upanimation" + zerohuka1to2(tubenum+ 1),
+            "id",
+            getPackageName()
+        )// 移動させるbottleのIｄを獲得
+        if(updown==0){
+            findViewById<TextView>(strId).setVisibility(View.GONE)//脚立を抹消する
+        }else {
+            findViewById<TextView>(strId).setVisibility(View.VISIBLE)//脚立を出現させる
+        }
+    }
+    fun animation2(tubenum:Int,updown:Int){//bottleの番号を受け取ってそれを選択中のアニメーションをする。（updown: 0=down, 1=up）
         var yaxis=-50F
         if(updown==0){yaxis=yaxis*-1}//downだったら-にする
         val translate= TranslateAnimation(0F,0F,0F,yaxis)
@@ -231,7 +257,6 @@ class MainActivity : AppCompatActivity() {
     もし、今後変わってきそうな数字を使う場合は一番上にある定数を使うこと。現時点での定数は以下の二つ
     val buttonnumber=5//試験管ボタンの数
     val boxnumber=4 //１試験管ごとの色付きBOXの個数
-    ifを使う場合は出来るだけelseも一緒に使って、予定外のものはerrorcod:Intに値を代入
     */
     fun completecheck(tubenum:Int):Boolean{//指定のtube(0～)の色が揃ったかを確認する
 
@@ -243,4 +268,6 @@ class MainActivity : AppCompatActivity() {
     }
     /*以上南専属*/
 
+
 }
+

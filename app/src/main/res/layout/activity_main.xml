@@ -77,8 +77,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/red" />
-
+                <TextView
+                    android:id="@+id/upanimation01"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:visibility="gone"/>
             </LinearLayout>
+
         </FrameLayout>
 
         <FrameLayout
@@ -124,6 +129,11 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/blue" />
 
+                <TextView
+                    android:id="@+id/upanimation02"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:visibility="gone"/>
             </LinearLayout>
         </FrameLayout>
 
@@ -170,6 +180,11 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/yellow" />
 
+                <TextView
+                    android:id="@+id/upanimation03"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:visibility="gone"/>
             </LinearLayout>
         </FrameLayout>
 
@@ -219,6 +234,11 @@
                     android:visibility="invisible"
                     android:src="@drawable/red" />
 
+                <TextView
+                    android:id="@+id/upanimation04"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:visibility="gone"/>
             </LinearLayout>
         </FrameLayout>
 
@@ -268,6 +288,11 @@
                     android:visibility="invisible"
                     android:src="@drawable/red" />
 
+                <TextView
+                    android:id="@+id/upanimation05"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:visibility="gone"/>
             </LinearLayout>
         </FrameLayout>
 
